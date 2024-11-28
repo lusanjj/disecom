@@ -104,17 +104,3 @@ This project serves as a showcase of technical and problem-solving skills, focus
 Special thanks to open-source tools and the Spring community for providing robust frameworks and libraries to build this project.
 
 ---
-
-## 🧑‍💻 Contact
-Feel free to reach out if you have questions or would like to collaborate:
-- **Email:** shane.liu@example.com
-- **GitHub:** [yourusername](https://github.com/yourusername)
-```
-
----
-
-### **How to Use It**
-1. Replace placeholders like `yourusername` and `shane.liu@example.com` with your actual GitHub username and contact details.
-2. Update the "Features" and "Future Enhancements" sections as you complete new parts of the project.
-
-This README will not only guide anyone viewing your repository but will also leave a strong impression on interviewers! Let me know if you'd like any further customizations.
