@@ -31,3 +31,34 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Java & Maven
+target/
+*.class
+
+# Spring Boot
+*.log
+*.properties
+*.yml
+!src/main/resources/application.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Git
+*.gitignore
+
+# Temp files
+*.tmp
+*.bak
+*.swp
+
