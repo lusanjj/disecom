@@ -34,4 +34,10 @@ public class AuthController {
     public String loginUser(@RequestBody LoginRequest loginRequest) {
         return authService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
     }
+
+    @GetMapping("/profile")
+    public String getProfile() {
+        return "This is your profile!";
+    }
+
 }
