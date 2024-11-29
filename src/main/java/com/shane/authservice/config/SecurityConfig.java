@@ -1,13 +1,3 @@
-/**
- * ClassName: SecurityConfig
- * Package: com.shane.authservice.config
- * Description: Configures security settings for the application
- *
- * @Author Shane Liu
- * @Create 2024/11/28 18:00
- * @Version 1.1
- */
-
 package com.shane.authservice.config;
 
 import com.shane.authservice.util.JwtRequestFilter;
@@ -30,10 +20,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh-token").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

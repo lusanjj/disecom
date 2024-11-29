@@ -1,10 +1,10 @@
 /**
  * ClassName: JwtRequestFilter
  * Package: com.shane.authservice.util
- * Description: Filter to validate JWT tokens in incoming requests
+ * Description: Filters incoming requests to validate JWT tokens
  *
  * @Author Shane Liu
- * @Create 2024/11/28 18:05
+ * @Create 2024/11/28 22:30
  * @Version 1.1
  */
 
@@ -37,8 +37,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String jwt = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            jwt = authHeader.substring(7); // Extract the token
+            try {
+                username = jwtUtil.extractUsername(jwt);
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Token has expired\"}");
+                return;
+            } catch (io.jsonwebtoken.SignatureException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Invalid token signature\"}");
+                return;
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Invalid token\"}");
+                return;
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

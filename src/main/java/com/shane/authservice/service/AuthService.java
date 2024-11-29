@@ -1,11 +1,11 @@
 /**
  * ClassName: AuthService
  * Package: com.shane.authservice.service
- * Description: Business logic for user authentication
+ * Description: Business logic for authentication and user management
  *
  * @Author Shane Liu
- * @Create 2024/11/28 19:00
- * @Version 1.2
+ * @Create 2024/11/28 22:05
+ * @Version 1.3
  */
 
 package com.shane.authservice.service;
@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -32,14 +34,36 @@ public class AuthService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /**
+     * Register a new user
+     *
+     * @param user the user to register
+     * @return a success message
+     */
     public String registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new AppException("Username already exists!", HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new AppException("Email already exists!", HttpStatus.BAD_REQUEST);
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return "User registered successfully!";
     }
 
-    public String loginUser(String username, String password) {
+    /**
+     * Login a user and generate tokens
+     *
+     * @param username the username
+     * @param password the password
+     * @return a map containing access and refresh tokens
+     */
+    public Map<String, String> loginUser(String username, String password) {
         Optional<User> userOptional = userRepository.findByUsername(username);
+
         if (userOptional.isEmpty()) {
             throw new AppException("User not found!", HttpStatus.NOT_FOUND);
         }
@@ -49,7 +73,13 @@ public class AuthService {
             throw new AppException("Invalid credentials!", HttpStatus.UNAUTHORIZED);
         }
 
-        // Generate and return JWT token
-        return jwtUtil.generateToken(username);
+        String accessToken = jwtUtil.generateAccessToken(username);
+        String refreshToken = jwtUtil.generateRefreshToken(username);
+
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        return tokens;
     }
 }
