@@ -11,9 +11,11 @@
 package com.shane.authservice.service;
 
 import com.shane.authservice.entity.User;
+import com.shane.authservice.exception.AppException;
 import com.shane.authservice.repository.UserRepository;
 import com.shane.authservice.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,15 +40,16 @@ public class AuthService {
 
     public String loginUser(String username, String password) {
         Optional<User> userOptional = userRepository.findByUsername(username);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                // Generate and return JWT token
-                return jwtUtil.generateToken(username);
-            } else {
-                return "Invalid credentials!";
-            }
+        if (userOptional.isEmpty()) {
+            throw new AppException("User not found!", HttpStatus.NOT_FOUND);
         }
-        return "User not found!";
+
+        User user = userOptional.get();
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new AppException("Invalid credentials!", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Generate and return JWT token
+        return jwtUtil.generateToken(username);
     }
 }
