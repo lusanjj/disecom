@@ -40,4 +40,7 @@ public class User {
     @NotNull(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
+
+    @Column(nullable = false)
+    private String role; // e.g., USER or ADMIN
 }

@@ -1,10 +1,10 @@
 /**
  * ClassName: AuthService
  * Package: com.shane.authservice.service
- * Description: Business logic for authentication and user management
+ * Description: Business logic for user authentication
  *
  * @Author Shane Liu
- * @Create 2024/11/28 22:05
+ * @Create 2024/11/28 23:15
  * @Version 1.3
  */
 
@@ -34,12 +34,6 @@ public class AuthService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    /**
-     * Register a new user
-     *
-     * @param user the user to register
-     * @return a success message
-     */
     public String registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new AppException("Username already exists!", HttpStatus.BAD_REQUEST);
@@ -54,13 +48,6 @@ public class AuthService {
         return "User registered successfully!";
     }
 
-    /**
-     * Login a user and generate tokens
-     *
-     * @param username the username
-     * @param password the password
-     * @return a map containing access and refresh tokens
-     */
     public Map<String, String> loginUser(String username, String password) {
         Optional<User> userOptional = userRepository.findByUsername(username);
 
@@ -73,8 +60,9 @@ public class AuthService {
             throw new AppException("Invalid credentials!", HttpStatus.UNAUTHORIZED);
         }
 
-        String accessToken = jwtUtil.generateAccessToken(username);
-        String refreshToken = jwtUtil.generateRefreshToken(username);
+        // Generate tokens with role included
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername(), user.getRole());
 
         Map<String, String> tokens = new HashMap<>();
         tokens.put("accessToken", accessToken);
@@ -82,4 +70,5 @@ public class AuthService {
 
         return tokens;
     }
+
 }

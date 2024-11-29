@@ -20,11 +20,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf(csrf -> csrf.disable()) // Disable CSRF protection for stateless APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh-token").permitAll()
+                        .requestMatchers("/", "/api/auth/register", "/api/auth/login", "/api/auth/refresh-token").permitAll()
+                        .requestMatchers("/api/auth/profile").hasAnyAuthority("USER", "ADMIN") // Allow USER and ADMIN roles
+                        .requestMatchers("/api/auth/admin").hasAuthority("ADMIN") // Only ADMIN
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
