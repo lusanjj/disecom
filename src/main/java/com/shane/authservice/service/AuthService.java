@@ -19,9 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -70,5 +72,60 @@ public class AuthService {
 
         return tokens;
     }
+//    generateResetToken for the new password
+    public void generateResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException("User with email not found!", HttpStatus.NOT_FOUND));
+
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Token valid for 1 hour
+
+        userRepository.save(user);
+
+        // TODO: Integrate email service to send the reset token
+        System.out.println("Reset Token: " + resetToken); // Placeholder for sending email
+    }
+
+//    for resetting the password
+
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new AppException("Invalid or expired reset token!", HttpStatus.BAD_REQUEST));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new AppException("Reset token has expired!", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null); // Invalidate token after use
+        user.setResetTokenExpiry(null);
+
+        userRepository.save(user);
+    }
+
+//  changePassword
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found!", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new AppException("Incorrect old password!", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+
+    public void invalidateToken(String refreshToken) {
+        // Example: Add logic to remove or blacklist the token
+        System.out.println("Invalidated token: " + refreshToken);
+        // TODO: Implement token blacklist if storing tokens server-side
+    }
+
+
+
+
 
 }

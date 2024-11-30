@@ -22,7 +22,7 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    private final int ACCESS_TOKEN_VALIDITY = 1000 * 30; // 15 minutes
+    private final int ACCESS_TOKEN_VALIDITY = 1000 * 60 * 15 ; // 15 minutes
     private final int REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24; // 24 hours
 
     public String generateAccessToken(String username, String role) {

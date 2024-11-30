@@ -15,8 +15,10 @@ import com.shane.authservice.dto.LoginRequest;
 import com.shane.authservice.service.AuthService;
 import com.shane.authservice.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -29,10 +31,44 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+
+//    password
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        authService.generateResetToken(email);
+        return "Password reset token sent to your email!";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+        authService.resetPassword(token, newPassword);
+        return "Password reset successfully!";
+    }
+
+    @PatchMapping("/change-password")
+    public String changePassword(@RequestBody Map<String, String> request, Principal principal) {
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+        authService.changePassword(principal.getName(), oldPassword, newPassword);
+        return "Password changed successfully!";
+    }
+
+    @PostMapping("/logout")
+    public String logout(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        authService.invalidateToken(refreshToken);
+        return "Logged out successfully!";
+    }
+
+    //resister
     @PostMapping("/register")
     public String registerUser(@RequestBody User user) {
+        // Default role
         if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("USER"); // Default role
+            user.setRole("USER");
         }
         return authService.registerUser(user);
     }
@@ -59,8 +95,6 @@ public class AuthController {
 
         // Generate a new accessToken with the extracted role
         String newAccessToken = jwtUtil.generateAccessToken(username, role);
-        System.out.println("Username from Refresh Token: " + username);
-        System.out.println("Role from Refresh Token: " + role);
 
         return Map.of("accessToken", newAccessToken);
     }
@@ -75,4 +109,11 @@ public class AuthController {
     public String adminEndpoint() {
         return "Welcome, Admin!";
     }
+
+
+
+
+
+
+
 }

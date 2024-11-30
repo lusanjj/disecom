@@ -23,7 +23,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection for stateless APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/auth/register", "/api/auth/login", "/api/auth/refresh-token").permitAll()
+                        .requestMatchers("/",
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/refresh-token",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
+                                ).permitAll()
                         .requestMatchers("/api/auth/profile").hasAnyAuthority("USER", "ADMIN") // Allow USER and ADMIN roles
                         .requestMatchers("/api/auth/admin").hasAuthority("ADMIN") // Only ADMIN
                         .anyRequest().authenticated()
